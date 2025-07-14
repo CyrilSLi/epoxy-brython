@@ -268,7 +268,7 @@ import("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-tls/full/epoxy-bundl
         wisp_v2: true,
         udp_extension_required: true
     });
-    client = new et.EpoxyClient("wss://wisp.mercurywork.shop", options);
+    const client = new et.EpoxyClient("wss://wisp.mercurywork.shop", options);
     while (fetchQueue.length > 0) {
         const item = fetchQueue.shift();
         queuedFetch(item.url, item.options, item.callback);

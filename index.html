@@ -3,19 +3,29 @@
 <head>
     <title>epoxy-brython test</title>
     <meta charset="utf-8">
-    <script src="https://cdn.jsdelivr.net/npm/brython@3/brython.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/brython@3/brython_stdlib.min.js"></script>
-    <script src="main.js"></script>
-    <style></style>
+    <style>
+        body {
+            height: 100%;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: row;
+        }
+        * {
+            margin: 0px;
+            padding: 0px;
+            border: none;
+        }
+        iframe {
+            width: 100%;
+            flex: 1;
+        }
+    </style>
+    <script src="framescript.js"></script>
 </head>
-<body onload="brython(0)">
+<body>
     <noscript>
         <p>JavaScript is required to use this website.</p>
     </noscript>
-    <button id="test">Test</button>
-    <script type="text/python">
-        from browser import ajax, document, window
-        ajax.get("https://jsonplaceholder.typicode.com/posts/1", mode = "json", oncomplete=lambda res: window.console.log(res.text))
-    </script>
 </body>
 </html>
