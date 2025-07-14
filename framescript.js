@@ -259,6 +259,7 @@ import("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-tls/full/epoxy-bundl
             const script = document.createElement("script");
             script.textContent = frameScript;
 
+            frameElement.remove();
             doc.head.insertBefore(script, doc.head.firstChild);
             frameElement.srcdoc = doc.documentElement.outerHTML;
 
@@ -272,14 +273,13 @@ import("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-tls/full/epoxy-bundl
                 replaceAttrs: replaceAttrs.bind(globalThis, doc, frameURL),
                 redirect: (url) => proxyFrame(frameElement, url)
             }
-            document.body.appendChild(frame);
+            document.body.appendChild(frameElement);
             for (const [orig, proxy] of Object.entries(proxyFuncs)) {
                 frame.contentWindow[orig] = proxy;
             }
         }, (err) => console.error("Error reading response text:", err)), (err) => console.error("Error fetching URL:", err));
     }
+    window.proxyFrame = proxyFrame;
 
-    const frame = document.createElement("iframe");
-    document.body.appendChild(frame);
-    proxyFrame(frame, new URLSearchParams(window.location.search).get("url") || "https://www.apple.com/");
+    proxyFrame(document.getElementById("frame"), "https://www.apple.com/"); // For demo purposes only
 }, (err) => console.error("Error initializing epoxy-tls:", err)), (err) => console.error("Error loading epoxy-tls:", err));
