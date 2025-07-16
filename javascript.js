@@ -126,7 +126,7 @@ XMLHttpRequest = class extends EventTarget {
 
         (async () => {
             try {
-                this.#response = await client.fetch(this.#req_url, this.#req_options);
+                this.#response = await fetch(this.#req_url, this.#req_options);
                 this.readyState = this.HEADERS_RECEIVED;
                 this.readyState = this.LOADING;
 

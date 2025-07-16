@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>epoxy-polyfill test</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/default.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
+    <script src="javascript.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3/brython_stdlib.min.js"></script>
+    <script src="brython.js"></script>
+    <style>
+        button {
+            margin-right: 20px;
+        }
+        button, div.grid, div.grid > * {
+            display: inline-block;
+        }
+        h2, h3 {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body onload="brython(0)">
+    <noscript>
+        <p>JavaScript is required to use this website.</p>
+    </noscript>
+    <div style="margin: 20px;">
+        <h1>epoxy-polyfill test</h1>
+        <p>This page tests</p>
+        <input id="url" type="search" placeholder="Enter URL to test" value="https://www.example.com">
+        <br>
+        <div class="grid">
+            <button id="xhr">Send</button>
+            <h3>JavaScript <code>XMLHttpRequest</code></h3>
+        </div>
+        <pre><code id="xhr-code" class="language-javascript"></code></pre>
+        <div class="grid">
+            <button id="fetch">Send</button>
+            <h3>JavaScript <code>fetch</code></h3>
+        </div>
+        <pre><code id="fetch-code" class="language-javascript"></code></pre>
+        <div class="grid">
+            <button id="ajax-get">Send</button>
+            <h3>Brython <code>ajax.get</code></h3>
+        </div>
+        <pre><code id="ajax-get-code" class="language-python"></code></pre>
+        <div class="grid">
+            <button id="ajax-ajax">Send</button>
+            <h3>Brython <code>ajax.Ajax</code></h3>
+        </div>
+        <pre><code id="ajax-ajax-code" class="language-python"></code></pre>
+        <h2>Result</h2>
+        <pre><code id="result" class="language-html"></code></pre>
+    </div>
+    <script>
+        hljs.configure({ ignoreUnescapedHTML: true });
+        function rehighlight() {
+            document.querySelectorAll("[data-highlighted]").forEach((el) => {
+                el.removeAttribute("data-highlighted");
+            });
+            hljs.highlightAll();
+        }
+
+        const templates = {
+            "xhr-code": 'const req = new XMLHttpRequest();\n' +
+                        'req.open("GET", "{}", true);\n' +
+                        'req.onreadystatechange = () => req.readyState === 4 && console.log(req.responseText);\n' +
+                        'req.send();',
+
+            "fetch-code": 'fetch("{}").then((res) => res.text().then((text) => console.log(text)));',
+
+            "ajax-get-code": 'from browser import ajax, window;\n' +
+                             'ajax.get("{}", oncomplete=lambda res: window.console.log(res.text))',
+
+            "ajax-ajax-code": 'from browser import ajax, window;\n' +
+                              'req = ajax.Ajax();\n' +
+                              'req.bind("complete", lambda res: window.console.log(res.text));\n' +
+                              'req.open("GET", "{}", True);\n' +
+                              'req.send();'
+        };
+        function URLInput () {
+            for (const [key, value] of Object.entries(templates)) {
+                document.getElementById(key).textContent = value.replace("{}", encodeURI(document.getElementById("url").value));
+            }
+            rehighlight();
+        }
+        document.getElementById("url").addEventListener("input", URLInput);
+        URLInput();
+
+        function getURL() {
+            const URL = document.getElementById("url").value;
+            if (URL.startsWith("http://") || URL.startsWith("https://")) {
+                return URL;
+            } else {
+                document.getElementById("url").value = "https://" + URL;
+                return "https://" + URL;
+            }
+        }
+
+        function xhrReq () {
+            document.getElementById("result").textContent = "";
+            const req = new XMLHttpRequest();
+            req.open("GET", getURL(), true);
+            req.onreadystatechange = () => {
+                if (req.readyState === 4) {
+                    document.getElementById("result").textContent = req.responseText;
+                    rehighlight();
+                }
+            }
+            req.send();
+        }
+        document.getElementById("xhr").addEventListener("click", xhrReq);
+
+        function fetchReq () {
+            document.getElementById("result").textContent = "";
+            fetch(getURL()).then((res) => res.text().then((text) => {
+                document.getElementById("result").textContent = text;
+                rehighlight();
+            }));
+        }
+        document.getElementById("fetch").addEventListener("click", fetchReq);
+
+        fetchReq();
+
+    </script>
+    <script type="text/python">
+        from browser import ajax, document, window
+
+        def complete(res):
+            document["result"].textContent = res.text if isinstance(res.text, str) else res.text.decode()
+            window.rehighlight()
+
+        def ajax_get(_):
+            document["result"].clear()
+            ajax.get(window.getURL(), oncomplete=complete)
+        document["ajax-get"].bind("click", ajax_get)
+
+        def ajax_ajax(_):
+            document["result"].clear()
+            req = ajax.Ajax()
+            req.bind("complete", complete)
+            req.open("GET", window.getURL(), True)
+            req.send()
+        document["ajax-ajax"].bind("click", ajax_ajax)
+    </script>
+</body>
+</html>
