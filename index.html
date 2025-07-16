@@ -5,11 +5,11 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/default.min.css">
-    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
     <script src="javascript.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/brython@3/brython.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/brython@3/brython_stdlib.min.js"></script>
     <script src="brython.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
     <style>
         button {
             margin-right: 20px;
@@ -22,7 +22,7 @@
         }
     </style>
 </head>
-<body onload="brython(0)">
+<body>
     <noscript>
         <p>JavaScript is required to use this website.</p>
     </noscript>
@@ -55,6 +55,22 @@
         <pre><code id="result" class="language-html"></code></pre>
     </div>
     <script>
+        // Test request queue by sending immediate request (in both JS and Brython)
+        brython(0); // Initialize Brython before epoxy-tls finishes loading
+        var initTestURL = "https://jsonplaceholder.typicode.com/albums/1";
+        function logInitResp(kind, text) {
+            console.groupCollapsed(kind + " received");
+            console.log(text);
+            console.groupEnd();
+        }
+        const initReq = new XMLHttpRequest();
+        fetch(initTestURL).then((res) => res.text().then((text) => logInitResp("JavaScript fetch", text)));
+        console.log("JavaScript fetch sent");
+        initReq.open("GET", initTestURL, true);
+        initReq.onreadystatechange = () => initReq.readyState === 4 && logInitResp("JavaScript XMLHttpRequest", initReq.responseText);
+        initReq.send();
+        console.log("JavaScript XMLHttpRequest sent");
+
         hljs.configure({ ignoreUnescapedHTML: true });
         function rehighlight() {
             document.querySelectorAll("[data-highlighted]").forEach((el) => {
@@ -76,8 +92,8 @@
 
             "ajax-ajax-code": 'from browser import ajax, window;\n' +
                               'req = ajax.Ajax();\n' +
-                              'req.bind("complete", lambda res: window.console.log(res.text));\n' +
                               'req.open("GET", "{}", True);\n' +
+                              'req.bind("complete", lambda res: window.console.log(res.text));\n' +
                               'req.send();'
         };
         function URLInput () {
@@ -121,12 +137,18 @@
             }));
         }
         document.getElementById("fetch").addEventListener("click", fetchReq);
-
-        fetchReq();
-
     </script>
     <script type="text/python">
         from browser import ajax, document, window
+
+        # Immediate requests, see above in JavaScript
+        init_req = ajax.Ajax()
+        ajax.get(window.initTestURL, oncomplete=lambda res: window.logInitResp("Brython ajax.get", res.text))
+        window.console.log("Brython ajax.get sent")
+        init_req.open("GET", window.initTestURL, True)
+        init_req.bind("complete", lambda res: window.logInitResp("Brython ajax.Ajax", res.text))
+        init_req.send()
+        window.console.log("Brython ajax.Ajax sent")
 
         def complete(res):
             document["result"].textContent = res.text if isinstance(res.text, str) else res.text.decode()
@@ -140,8 +162,8 @@
         def ajax_ajax(_):
             document["result"].clear()
             req = ajax.Ajax()
-            req.bind("complete", complete)
             req.open("GET", window.getURL(), True)
+            req.bind("complete", complete)
             req.send()
         document["ajax-ajax"].bind("click", ajax_ajax)
     </script>

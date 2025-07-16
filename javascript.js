@@ -1,19 +1,31 @@
-var fetch, XMLHttpRequest; // Exposed variables
+if (typeof _epoxyPolyfillClient === "undefined") {
+    console.log("loading epoxy-tls from JS polyfill");
+    var _epoxyPolyfillClient = null, _epoxyPolyfillQueue = [];
+    import("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-tls/full/epoxy-bundled.min.js").then((et) => et.default().then(() => {
+        const options = new et.EpoxyClientOptions({
+            user_agent: navigator.userAgent,
+            wisp_v2: true,
+            udp_extension_required: true
+        });
+        _epoxyPolyfillClient = new et.EpoxyClient("wss://wisp.mercurywork.shop", options);
+        while (_epoxyPolyfillQueue.length > 0) {
+            _epoxyPolyfillQueue.shift()();
+        }
+        console.log("epoxy-tls loaded successfully")
+    }, (err) => console.error("Error initializing epoxy-tls:", err)), (err) => console.error("Error loading epoxy-tls:", err));
+}
 
-{
-let client, fetchQueue = [];
-
-fetch = function(url, options) {  
-    if (client !== undefined) {
-        return client.fetch(url, options);
+function fetch(url, options) {  
+    if (_epoxyPolyfillClient != null) {
+        return _epoxyPolyfillClient.fetch(url, options);
     } else {
         return new Promise((resolve) => {
-            fetchQueue.push(() => resolve(client.fetch(url, options)));
+            _epoxyPolyfillQueue.push(() => resolve(_epoxyPolyfillClient.fetch(url, options)));
         });
     }
 }
 
-XMLHttpRequest = class extends EventTarget {
+class XMLHttpRequest extends EventTarget {
     UNSENT = 0;
     OPENED = 1;
     HEADERS_RECEIVED = 2;
@@ -222,17 +234,4 @@ XMLHttpRequest = class extends EventTarget {
     get upload() {
         return this.#upload;
     }
-}
-
-import("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-tls/full/epoxy-bundled.min.js").then((et) => et.default().then(() => {
-    const options = new et.EpoxyClientOptions({
-        user_agent: navigator.userAgent,
-        wisp_v2: true,
-        udp_extension_required: true
-    });
-    client = new et.EpoxyClient("wss://wisp.mercurywork.shop", options);
-    while (fetchQueue.length > 0) {
-        fetchQueue.shift()();
-    }
-}, (err) => console.error("Error initializing epoxy-tls:", err)), (err) => console.error("Error loading epoxy-tls:", err));
 }

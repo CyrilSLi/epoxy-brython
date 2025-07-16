@@ -1,7 +1,22 @@
-{
-let client, fetchQueue = [];
-let oldBrowser = $B.imported.browser;
+if (typeof _epoxyPolyfillClient === "undefined") {
+    console.log("loading epoxy-tls from Brython polyfill");
+    var _epoxyPolyfillClient = null, _epoxyPolyfillQueue = [];
+    import("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-tls/full/epoxy-bundled.min.js").then((et) => et.default().then(() => {
+        const options = new et.EpoxyClientOptions({
+            user_agent: navigator.userAgent,
+            wisp_v2: true,
+            udp_extension_required: true
+        });
+        _epoxyPolyfillClient = new et.EpoxyClient("wss://wisp.mercurywork.shop", options);
+        while (_epoxyPolyfillQueue.length > 0) {
+            _epoxyPolyfillQueue.shift()();
+        }
+        console.log("epoxy-tls loaded successfully")
+    }, (err) => console.error("Error initializing epoxy-tls:", err)), (err) => console.error("Error loading epoxy-tls:", err));
+}
 
+{
+let oldBrowser = $B.imported.browser;
 $B.imported.browser = new Proxy(oldBrowser, {
     set(target, prop, value) {
         target[prop] = value;
@@ -126,7 +141,7 @@ $B.imported.browser = new Proxy(oldBrowser, {
                         this.#req_options.body = body || undefined;
 
                         try {
-                            const fetchReq = () => {client.fetch(this.#req_url, this.#req_options).then((res) => {
+                            const fetchReq = () => {_epoxyPolyfillClient.fetch(this.#req_url, this.#req_options).then((res) => {
                                 this.#response = res;
                                 this.readyState = this.HEADERS_RECEIVED;
                                 this.readyState = this.LOADING;
@@ -141,7 +156,7 @@ $B.imported.browser = new Proxy(oldBrowser, {
                                     this.#emit_event(new ProgressEvent("loadend"));
                                 });
                             })};
-                            client !== undefined ? fetchReq() : fetchQueue.push(fetchReq);
+                            _epoxyPolyfillClient != null ? fetchReq() : _epoxyPolyfillQueue.push(fetchReq);
                         } catch (e) {
                             this.#emit_event(new ProgressEvent("error"));
                         }
@@ -250,16 +265,4 @@ $B.imported.browser = new Proxy(oldBrowser, {
         return true;
     }
 });
-
-import("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-tls/full/epoxy-bundled.min.js").then((et) => et.default().then(() => {
-    const options = new et.EpoxyClientOptions({
-        user_agent: navigator.userAgent,
-        wisp_v2: true,
-        udp_extension_required: true
-    });
-    client = new et.EpoxyClient("wss://wisp.mercurywork.shop", options);
-    while (fetchQueue.length > 0) {
-        fetchQueue.shift()();
-    }
-}, (err) => console.error("Error initializing epoxy-tls:", err)), (err) => console.error("Error loading epoxy-tls:", err));
 }
