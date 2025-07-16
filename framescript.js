@@ -91,7 +91,7 @@ import("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-tls/full/epoxy-bundl
         }
 
         open(method, url, async, user, password) {
-            if (async ===false) //erroring here is actually permitted by spec
+            if (async === false) //erroring here is actually permitted by spec
                 throw new DOMException("InvalidAccessError");
 
             this.#init_internal();
@@ -108,6 +108,7 @@ import("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-tls/full/epoxy-bundl
         }
 
         send(body) {
+            console.log("Sending " + this.#req_options.method + " request to " + this.#req_url.href);
             if (this.#req_options.method === "GET")
                 body = undefined;
 
@@ -245,11 +246,12 @@ import("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-tls/full/epoxy-bundl
         });
     }
 
-    const frameScript = ""; /* `
-        console.log(XMLHttpRequest);
-        console.log(fetch);
-        console.log(replaceAttrs);
-    `; */
+    const frameScript = `
+        console.log("XHR: ", XMLHttpRequest);
+        console.log("Fetch: ", fetch);
+        console.log("ReplaceAttrs: ", replaceAttrs);
+        console.log("Redirect: ", redirect);
+    `;
 
     function proxyFrame(frameElement, frameURL) {
         client.fetch(frameURL).then((res) => res.text().then((html) => {
@@ -277,9 +279,10 @@ import("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-tls/full/epoxy-bundl
             for (const [orig, proxy] of Object.entries(proxyFuncs)) {
                 frame.contentWindow[orig] = proxy;
             }
+            window.E = frame.contentWindow.eval; // Expose eval for debugging
         }, (err) => console.error("Error reading response text:", err)), (err) => console.error("Error fetching URL:", err));
     }
     window.proxyFrame = proxyFrame;
 
-    proxyFrame(document.getElementById("frame"), "https://www.apple.com/"); // For demo purposes only
+    proxyFrame(document.getElementById("frame"), "https://www.github.com/"); // For demo purposes only
 }, (err) => console.error("Error initializing epoxy-tls:", err)), (err) => console.error("Error loading epoxy-tls:", err));

@@ -1,15 +1,16 @@
-var client, fetchQueue = [];
-const oldBrowser = $B.imported.browser;
+{
+let client, fetchQueue = [];
+let oldBrowser = $B.imported.browser;
 
-function queuedFetch(url, options, callback) {  
+function queuedFetch(url, options, callback) {
     if (client !== undefined) {
         client.fetch(url, options).then(callback);
     } else {
-        fetchQueue.push({ url, options, callback });
+        fetchQueue.push(() => queuedFetch(url, options, callback));
     }
 }
 
-class polyfillXHR extends EventTarget {
+XMLHttpRequest = class extends EventTarget {
     UNSENT = 0;
     OPENED = 1;
     HEADERS_RECEIVED = 2;
@@ -95,7 +96,7 @@ class polyfillXHR extends EventTarget {
     }
 
     open(method, url, async, user, password) {
-        if (async === false) // erroring here is actually permitted by spec
+        if (async === false) //erroring here is actually permitted by spec
             throw new DOMException("InvalidAccessError");
 
         this.#init_internal();
@@ -254,7 +255,7 @@ $B.imported.browser = new Proxy(oldBrowser, {
                     __dict__: $B.empty_dict(),
                     headers: {}
                 };
-                res.js = new polyfillXHR(res);
+                res.js = new XMLHttpRequest(res);
                 return res;
             };
         }
@@ -268,9 +269,9 @@ import("https://cdn.jsdelivr.net/npm/@mercuryworkshop/epoxy-tls/full/epoxy-bundl
         wisp_v2: true,
         udp_extension_required: true
     });
-    const client = new et.EpoxyClient("wss://wisp.mercurywork.shop", options);
+    client = new et.EpoxyClient("wss://wisp.mercurywork.shop", options);
     while (fetchQueue.length > 0) {
-        const item = fetchQueue.shift();
-        queuedFetch(item.url, item.options, item.callback);
+        fetchQueue.shift()();
     }
 }, (err) => console.error("Error initializing epoxy-tls:", err)), (err) => console.error("Error loading epoxy-tls:", err));
+}
