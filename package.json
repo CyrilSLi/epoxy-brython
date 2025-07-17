@@ -1,5 +1,5 @@
 {
-  "name": "epoxy-polyfill",
+  "name": "epoxy-tls-polyfill",
   "version": "1.0.0",
   "description": "Polyfills for XHR, fetch, and the Brython AJAX interface using epoxy-tls",
   "keywords": [
@@ -14,13 +14,13 @@
     "epoxy",
     "epoxy-tls"
   ],
-  "homepage": "https://cyrilsli.github.io/epoxy-polyfill",
+  "homepage": "https://cyrilsli.github.io/epoxy-tls-polyfill",
   "bugs": {
-    "url": "https://github.com/CyrilSLi/epoxy-polyfill/issues"
+    "url": "https://github.com/CyrilSLi/epoxy-tls-polyfill/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CyrilSLi/epoxy-polyfill.git"
+    "url": "git+https://github.com/CyrilSLi/epoxy-tls-polyfill.git"
   },
   "scripts": {
     "prepublishOnly": "src/build.py"

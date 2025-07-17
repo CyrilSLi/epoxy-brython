@@ -1,10 +1,10 @@
-# epoxy-polyfill
+# epoxy-tls-polyfill
 
 This package provides polyfills for XHR, fetch, and the Brython AJAX interface using epoxy-tls.
 It allows making web requests using these APIs without CORS restrictions using a [Wisp](https://github.com/MercuryWorkshop/wisp-protocol) proxy,
 which keeps your data encrypted unlike HTTP proxies.
 
-[npm](https://www.npmjs.com/package/epoxy-polyfill)&nbsp;&nbsp;&nbsp;[jsDelivr](https://www.jsdelivr.com/package/npm/epoxy-polyfill)
+[npm](https://www.npmjs.com/package/epoxy-tls-polyfill)&nbsp;&nbsp;&nbsp;[jsDelivr](https://www.jsdelivr.com/package/npm/epoxy-tls-polyfill)
 
 ## Demos
 
@@ -27,7 +27,7 @@ as the base64 encoded bundle is around 500KB larger than dynamically loading the
 The scripts are designed to be included with `<script>` tags in an HTML file and require no additional configuration:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/epoxy-polyfill@1/dist/javascript.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/epoxy-tls-polyfill@1/dist/javascript.min.js"></script>
 ```
 
 If using the Brython versions (`brython.min.js` or `brython-bundled.min.js`), place this script **after all Brython scripts**, for example:
@@ -35,7 +35,7 @@ If using the Brython versions (`brython.min.js` or `brython-bundled.min.js`), pl
 ```html
 <script src="https://cdn.jsdelivr.net/npm/brython@3/brython.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/brython@3/brython_stdlib.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/epoxy-polyfill@1/dist/brython.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/epoxy-tls-polyfill@1/dist/brython.min.js"></script>
 ```
 
 Including **both unbundled** or **both bundled** script versions is supported and they will share a single `epoxy-tls` instance.
