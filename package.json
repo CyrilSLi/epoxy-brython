@@ -1,0 +1,31 @@
+{
+  "name": "epoxy-polyfill",
+  "version": "1.0.0",
+  "description": "Polyfills for XHR, fetch, and the Brython AJAX interface using epoxy-tls",
+  "keywords": [
+    "brython",
+    "wasm",
+    "xhr",
+    "fetch",
+    "proxy",
+    "http",
+    "ssl",
+    "tls",
+    "epoxy",
+    "epoxy-tls"
+  ],
+  "homepage": "https://cyrilsli.github.io/epoxy-polyfill",
+  "bugs": {
+    "url": "https://github.com/CyrilSLi/epoxy-polyfill/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CyrilSLi/epoxy-polyfill.git"
+  },
+  "scripts": {
+    "prepublishOnly": "src/build.py"
+  },
+  "license": "AGPL-3.0-only",
+  "author": "CyrilSLi",
+  "main": "dist/brython.min.js"
+}
